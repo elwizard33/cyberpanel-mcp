@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Questions & Discussions
+    url: https://github.com/elwizard33/cyberpanel-mcp/discussions
+    about: Ask questions and discuss ideas in GitHub Discussions
+  - name: 🌐 CyberPanel Community
+    url: https://community.cyberpanel.net/
+    about: Get help from the CyberPanel community
+  - name: 📖 Documentation
+    url: https://github.com/elwizard33/cyberpanel-mcp#readme
+    about: Read the documentation before creating an issue

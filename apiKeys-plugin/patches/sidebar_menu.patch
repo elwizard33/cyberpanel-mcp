@@ -1,0 +1,13 @@
+--- a/baseTemplate/templates/baseTemplate/index.html
++++ b/baseTemplate/templates/baseTemplate/index.html
+@@ -1891,6 +1891,10 @@
+                 <a href="{% url 'aiScannerHome' %}" class="menu-item">
+                     <span>AI Scanner</span>
+                 </a>
++                <a href="{% url 'apiKeys' %}" class="menu-item">
++                    <span>API Keys</span>
++                    <span class="badge">NEW</span>
++                </a>
+             </div>
+             
+             <a href="#" class="menu-item" onclick="toggleSubmenu('mail-settings-submenu', this); return false;">

@@ -1,0 +1,54 @@
+--- a/cloudAPI/views.py
++++ b/cloudAPI/views.py
+@@ -4,6 +4,8 @@ from .cloudManager import CloudManager
+ import json
+ from loginSystem.models import Administrator
+ from django.views.decorators.csrf import csrf_exempt
++from django.utils import timezone
++import hashlib
+ from django.shortcuts import HttpResponse
+ 
+ @csrf_exempt
+@@ -23,12 +25,33 @@ def router(request):
+         if admin.api == 0:
+             return cm.ajaxPre(0, 'API Access Disabled.')
+ 
+-        try:
+-            if cm.verifyLogin(request)[0] == 1:
+-                pass
+-            else:
+-                return cm.verifyLogin(request)[1]
+-        except BaseException as msg:
+-            return cm.ajaxPre(0, f"Something went wrong during token processing. ErrorL {str(msg)}")
++        # Check for X-API-Key header authentication (MCP Server)
++        api_key_header = request.META.get('HTTP_X_API_KEY', '')
++        if api_key_header and api_key_header.startswith('cp_'):
++            try:
++                from apiKeys.models import APIKey
++                # Hash the incoming key and compare to stored hash
++                key_hash = hashlib.sha256(api_key_header.encode()).hexdigest()
++                api_key_obj = APIKey.objects.filter(
++                    key_hash=key_hash,
++                    is_active=True,
++                    admin=admin
++                ).first()
++                if api_key_obj:
++                    api_key_obj.last_used = timezone.now()
++                    api_key_obj.save(update_fields=['last_used'])
++                    # API key validated - proceed to controller
++                else:
++                    return cm.ajaxPre(0, 'Invalid or inactive API key.')
++            except Exception as e:
++                return cm.ajaxPre(0, f'API key validation error: {str(e)}')
++        else:
++            # Existing token authentication
++            try:
++                if cm.verifyLogin(request)[0] == 1:
++                    pass
++                else:
++                    return cm.verifyLogin(request)[1]
++            except BaseException as msg:
++                return cm.ajaxPre(0, f"Something went wrong during token processing. Error: {str(msg)}")
+ 
+ 
+         ## Debug Log

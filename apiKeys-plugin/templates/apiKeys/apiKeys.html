@@ -1,0 +1,1588 @@
+{% extends "baseTemplate/index.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "API Keys - CyberPanel" %}{% endblock %}
+
+{% block header_scripts %}
+<style>
+    .modern-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border-radius: 20px;
+        animation: fadeInDown 0.5s ease-out;
+        position: relative;
+        overflow: hidden;
+        color: white;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .page-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.9);
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Panel Styles */
+    .content-panel {
+        background: var(--bg-secondary, white);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid var(--border-color, #e8e9ff);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .panel-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .panel-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .panel-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .panel-content {
+        padding: 2rem;
+    }
+
+    /* Create Key Form */
+    .create-key-form {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .create-key-form input {
+        flex: 1;
+        min-width: 300px;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid var(--border-color, #e8e9ff);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: var(--bg-primary, #f8f9ff);
+        color: #1f2937;
+    }
+
+    .create-key-form input::placeholder {
+        color: #9ca3af;
+    }
+
+    .create-key-form input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn-generate {
+        padding: 0.875rem 2rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-generate:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* New Key Alert */
+    .new-key-alert {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border: 2px solid #f59e0b;
+        border-radius: 16px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.3s ease-out;
+    }
+
+    .new-key-alert h4 {
+        color: #92400e;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.125rem;
+    }
+
+    .new-key-alert p {
+        color: #78350f;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+    }
+
+    .full-key-display {
+        font-family: 'Fira Code', 'Courier New', monospace;
+        background: white;
+        padding: 1rem 1.25rem;
+        border-radius: 10px;
+        word-break: break-all;
+        margin-bottom: 1rem;
+        border: 2px dashed #f59e0b;
+        font-size: 0.95rem;
+        color: #1e293b;
+    }
+
+    .alert-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-copy-key {
+        padding: 0.625rem 1.25rem;
+        background: #f59e0b;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-copy-key:hover {
+        background: #d97706;
+    }
+
+    .btn-dismiss {
+        padding: 0.625rem 1.25rem;
+        background: rgba(146, 64, 14, 0.15);
+        color: #92400e;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-dismiss:hover {
+        background: rgba(146, 64, 14, 0.25);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-secondary, #64748b);
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--bg-tertiary, #f1f5f9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .empty-icon i {
+        font-size: 2rem;
+        color: #94a3b8;
+    }
+
+    .empty-state h5 {
+        font-size: 1.25rem;
+        color: var(--text-primary, #1e293b);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Keys Table */
+    .keys-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .keys-table th {
+        text-align: left;
+        padding: 1rem 1.25rem;
+        font-weight: 600;
+        color: var(--text-secondary, #64748b);
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid var(--border-color, #e8e9ff);
+        background: var(--bg-tertiary, #f8f9ff);
+    }
+
+    .keys-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--border-color, #e8e9ff);
+        vertical-align: middle;
+    }
+
+    .keys-table tr:hover {
+        background: var(--bg-tertiary, #f8f9ff);
+    }
+
+    .key-name {
+        font-weight: 600;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .key-preview {
+        font-family: 'Fira Code', 'Courier New', monospace;
+        background: var(--bg-primary, #f1f5f9);
+        padding: 0.375rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        color: #64748b;
+    }
+
+    .status-badge {
+        padding: 0.375rem 0.875rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-revoked {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    .meta-text {
+        color: var(--text-secondary, #64748b);
+        font-size: 0.875rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.5rem 0.875rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+    }
+
+    .btn-config {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+    }
+
+    .btn-config:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-toggle {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+    }
+
+    .btn-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .btn-delete:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background: var(--bg-secondary, white);
+        border-radius: 20px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        position: relative;
+        animation: slideUp 0.3s ease-out;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .modal-header h4 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-description {
+        color: var(--text-secondary, #64748b);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    /* IDE Install Options */
+    .ide-options {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ide-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .ide-option-vscode {
+        background: linear-gradient(135deg, #007ACC 0%, #0065a9 100%);
+        color: white;
+    }
+
+    .ide-option-vscode:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 122, 204, 0.4);
+    }
+
+    .ide-option-cursor {
+        background: linear-gradient(135deg, #000000 0%, #1a1a2e 100%);
+        color: white;
+    }
+
+    .ide-option-cursor:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .ide-option-claude {
+        background: linear-gradient(135deg, #ff7043 0%, #e64a19 100%);
+        color: white;
+    }
+
+    .ide-option-claude:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 112, 67, 0.4);
+    }
+
+    .ide-icon {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .ide-icon img {
+        width: 28px;
+        height: 28px;
+    }
+
+    .ide-info {
+        flex: 1;
+    }
+
+    .ide-name {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .ide-description {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .ide-arrow {
+        font-size: 1.25rem;
+        opacity: 0.8;
+    }
+
+    /* Manual Config Section */
+    .manual-config-toggle {
+        text-align: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color, #e8e9ff);
+    }
+
+    .manual-config-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary, #64748b);
+        cursor: pointer;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .manual-config-btn:hover {
+        color: #3b82f6;
+    }
+
+    .manual-config-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color, #e8e9ff);
+    }
+
+    .config-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .config-tab {
+        padding: 0.75rem 1.25rem;
+        border: 2px solid var(--border-color, #e8e9ff);
+        background: var(--bg-tertiary, #f8f9ff);
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .config-tab:hover {
+        border-color: #3b82f6;
+    }
+
+    .config-tab.active {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-color: transparent;
+    }
+
+    .config-display-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .config-display {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1.25rem;
+        border-radius: 12px;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .copy-config-btn {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: all 0.2s ease;
+    }
+
+    .copy-config-btn:hover {
+        background: #2563eb;
+    }
+
+    .setup-instructions {
+        background: var(--bg-tertiary, #f8f9ff);
+        padding: 1.25rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color, #e8e9ff);
+    }
+
+    .setup-instructions h5 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .setup-instructions ol {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: var(--text-secondary, #64748b);
+    }
+
+    .setup-instructions li {
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .loading-spinner i {
+        font-size: 2rem;
+        color: #3b82f6;
+    }
+
+    /* Update Checker */
+    .update-panel {
+        background: var(--bg-secondary, white);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid var(--border-color, #e8e9ff);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .update-panel-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .update-panel-title {
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .update-panel-content {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .version-info {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .version-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--bg-tertiary, #f1f5f9);
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    .version-badge.current {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1d4ed8;
+    }
+
+    .version-badge.latest {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+
+    .version-badge.update-available {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+
+    .version-label {
+        font-weight: 500;
+        color: var(--text-secondary, #64748b);
+    }
+
+    .version-number {
+        font-weight: 700;
+        font-family: 'Fira Code', monospace;
+    }
+
+    .btn-check-update {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-check-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-check-update:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-update-now {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-update-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .update-status {
+        font-size: 0.875rem;
+        color: var(--text-secondary, #64748b);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .update-status.success {
+        color: #059669;
+    }
+
+    .update-status.error {
+        color: #dc2626;
+    }
+
+    .release-notes {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color, #e8e9ff);
+    }
+
+    .release-notes h6 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary, #1e293b);
+    }
+
+    .release-notes p {
+        font-size: 0.8125rem;
+        color: var(--text-secondary, #64748b);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .release-notes a {
+        color: #3b82f6;
+        text-decoration: none;
+    }
+
+    .release-notes a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modern-container {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+        }
+
+        .page-icon {
+            width: 48px;
+            height: 48px;
+        }
+
+        .create-key-form {
+            flex-direction: column;
+        }
+
+        .create-key-form input {
+            min-width: 100%;
+        }
+
+        .btn-generate {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .keys-table {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="modern-container" id="apiKeysApp">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="page-title">
+                <div class="page-icon">
+                    <i class="fas fa-key fa-lg"></i>
+                </div>
+                {% trans "API Key Management" %}
+            </div>
+            <p class="page-subtitle">
+                {% trans "Create and manage API keys for secure MCP Server integration with CyberPanel" %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Update Checker Panel -->
+    <div class="update-panel">
+        <div class="update-panel-header">
+            <div class="update-panel-title">
+                <i class="fas fa-sync-alt"></i>
+                {% trans "Plugin Updates" %}
+            </div>
+        </div>
+        <div class="update-panel-content">
+            <div class="version-info">
+                <div class="version-badge current">
+                    <span class="version-label">{% trans "Installed" %}:</span>
+                    <span class="version-number">v[[ currentVersion ]]</span>
+                </div>
+                <div v-if="latestVersion && latestVersion !== currentVersion" 
+                     :class="['version-badge', updateAvailable ? 'update-available' : 'latest']">
+                    <span class="version-label">{% trans "Latest" %}:</span>
+                    <span class="version-number">v[[ latestVersion ]]</span>
+                </div>
+                <div v-if="!latestVersion && !checkingUpdate" class="update-status">
+                    <i class="fas fa-info-circle"></i>
+                    {% trans "Click to check for updates" %}
+                </div>
+                <div v-if="checkingUpdate" class="update-status">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    {% trans "Checking..." %}
+                </div>
+                <div v-if="updateAvailable" class="update-status" style="color: #d97706;">
+                    <i class="fas fa-arrow-up"></i>
+                    {% trans "Update available!" %}
+                </div>
+                <div v-if="latestVersion && !updateAvailable && latestVersion === currentVersion" class="update-status success">
+                    <i class="fas fa-check-circle"></i>
+                    {% trans "You're up to date!" %}
+                </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button class="btn-check-update" @click="checkForUpdates" :disabled="checkingUpdate">
+                    <i :class="['fas', checkingUpdate ? 'fa-spinner fa-spin' : 'fa-sync-alt']"></i>
+                    {% trans "Check Updates" %}
+                </button>
+                <button v-if="updateAvailable" class="btn-update-now" @click="showUpdateInstructions = true">
+                    <i class="fas fa-download"></i>
+                    {% trans "Update Now" %}
+                </button>
+            </div>
+        </div>
+        <div v-if="releaseNotes" class="release-notes" style="padding: 0 1.5rem 1.25rem;">
+            <h6><i class="fas fa-file-alt"></i> {% trans "Release Notes" %} (v[[ latestVersion ]])</h6>
+            <p>[[ releaseNotes ]]</p>
+            <p v-if="releaseUrl" style="margin-top: 0.5rem;">
+                <a :href="releaseUrl" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> {% trans "View on GitHub" %}
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Update Instructions Modal -->
+    <div v-if="showUpdateInstructions" class="modal-overlay" @click.self="showUpdateInstructions = false">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                <h4><i class="fas fa-download"></i> {% trans "Update Plugin" %}</h4>
+                <button class="modal-close" @click="showUpdateInstructions = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    {% trans "Run these commands on your CyberPanel server to update the plugin:" %}
+                </p>
+                <div class="config-display-wrapper">
+                    <button class="copy-config-btn" @click="copyUpdateCommands">
+                        <i class="fas fa-copy"></i> {% trans "Copy" %}
+                    </button>
+                    <div class="config-display">cd ~/cyberpanel-mcp
+git pull
+sudo bash update-plugin.sh</div>
+                </div>
+                <div class="setup-instructions">
+                    <h5><i class="fas fa-info-circle"></i> {% trans "What happens during update" %}</h5>
+                    <ol>
+                        <li>{% trans "Your API keys are safely stored in MySQL and will NOT be deleted" %}</li>
+                        <li>{% trans "Plugin files will be updated to the latest version" %}</li>
+                        <li>{% trans "The CyberPanel service will be restarted automatically" %}</li>
+                        <li>{% trans "Refresh this page after the update completes" %}</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Key Created Alert -->
+    <div v-if="newlyCreatedKey" class="new-key-alert">
+        <h4><i class="fas fa-exclamation-triangle"></i> {% trans "⚠️ Save Your API Key NOW!" %}</h4>
+        <p>{% trans "This key is shown only ONCE and cannot be recovered. We store only a secure hash - if you lose it, you'll need to create a new key." %}</p>
+        <div class="full-key-display">[[ newlyCreatedKey ]]</div>
+        <div class="alert-actions">
+            <button class="btn-copy-key" @click="copyToClipboard(newlyCreatedKey)">
+                <i class="fas fa-copy"></i> {% trans "Copy Key" %}
+            </button>
+            <button class="btn-dismiss" @click="newlyCreatedKey = null">
+                <i class="fas fa-check"></i> {% trans "I've Saved It Securely" %}
+            </button>
+        </div>
+    </div>
+    
+    <!-- Create New Key Panel -->
+    <div class="content-panel">
+        <div class="panel-header">
+            <div class="panel-title">
+                <div class="panel-icon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                {% trans "Create New API Key" %}
+            </div>
+        </div>
+        <div class="panel-content">
+            <div class="create-key-form">
+                <input type="text" v-model="newKeyName" 
+                       placeholder="{% trans 'Key Name (e.g., My MCP Server)' %}"
+                       @keyup.enter="createKey">
+                <button class="btn-generate" @click="createKey" :disabled="loading || !newKeyName.trim()">
+                    <i class="fas fa-key"></i> {% trans "Generate Key" %}
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Keys List Panel -->
+    <div class="content-panel" style="animation-delay: 0.1s;">
+        <div class="panel-header">
+            <div class="panel-title">
+                <div class="panel-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                {% trans "Your API Keys" %}
+            </div>
+            <span v-if="keys.length > 0" style="opacity: 0.8; font-size: 0.875rem;">
+                [[ keys.length ]] key[[ keys.length !== 1 ? 's' : '' ]]
+            </span>
+        </div>
+        <div class="panel-content" style="padding: 0;">
+            
+            <!-- Empty State -->
+            <div v-if="keys.length === 0 && !loading" class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h5>{% trans "No API Keys Yet" %}</h5>
+                <p>{% trans "Create your first API key to connect MCP clients to CyberPanel" %}</p>
+            </div>
+            
+            <!-- Loading -->
+            <div v-if="loading" class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            
+            <!-- Keys Table -->
+            <table v-if="keys.length > 0 && !loading" class="keys-table">
+                <thead>
+                    <tr>
+                        <th>{% trans "Name" %}</th>
+                        <th>{% trans "Key Preview" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th>{% trans "Last Used" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="key in keys" :key="key.id">
+                        <td><span class="key-name">[[ key.name ]]</span></td>
+                        <td><span class="key-preview">[[ key.key_preview ]]</span></td>
+                        <td><span class="meta-text">[[ formatDate(key.created_at) ]]</span></td>
+                        <td><span class="meta-text">[[ key.last_used ? formatDate(key.last_used) : 'Never' ]]</span></td>
+                        <td>
+                            <span :class="['status-badge', key.is_active ? 'status-active' : 'status-revoked']">
+                                [[ key.is_active ? 'Active' : 'Revoked' ]]
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn btn-config" @click="showMCPConfig(key)" v-if="key.is_active">
+                                    <i class="fas fa-code"></i> Config
+                                </button>
+                                <button class="action-btn btn-toggle" @click="revokeKey(key)">
+                                    <i :class="['fas', key.is_active ? 'fa-ban' : 'fa-check']"></i>
+                                    [[ key.is_active ? 'Revoke' : 'Activate' ]]
+                                </button>
+                                <button class="action-btn btn-delete" @click="deleteKey(key)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- MCP Config Modal -->
+    <div v-if="showConfigModal" class="modal-overlay" @click.self="showConfigModal = false">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4><i class="fas fa-plug"></i> {% trans "Install MCP Server" %}</h4>
+                <button class="modal-close" @click="showConfigModal = false">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">
+                    {% trans "Choose your IDE to automatically configure the CyberPanel MCP Server." %}
+                </p>
+                
+                <!-- IDE Options -->
+                <div class="ide-options">
+                    <a :href="vscodeInstallUrl" class="ide-option ide-option-vscode">
+                        <div class="ide-icon">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMzIgMzIiIGZpbGw9IiNmZmZmZmYiPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0zMC44NjUgMy40NDhMMjQuMjgyLjI4MWExLjk5IDEuOTkgMCAwIDAtMi4yNzYuMzg1TDkuMzk3IDEyLjE3MUwzLjkwMiA4LjAwNGExLjMzIDEuMzMgMCAwIDAtMS43MDMuMDczTC40MzkgOS42ODFhMS4zMyAxLjMzIDAgMCAwLS4wMDUgMS45NjlMNS4yIDE1Ljk5OUwuNDM0IDIwLjM0OGExLjMzIDEuMzMgMCAwIDAgLjAwNSAxLjk2OWwxLjc2IDEuNjA0YTEuMzMgMS4zMyAwIDAgMCAxLjcwMy4wNzNsNS40OTUtNC4xNzJsMTIuNjE1IDExLjUxYTEuOTgyIDEuOTgyIDAgMCAwIDIuMjcxLjM4NWw2LjU4OS0zLjE3MmExLjk5MyAxLjk5MyAwIDAgMCAxLjEzLTEuODAyVjUuMjQ4YzAtLjc2Ni0uNDQzLTEuNDY5LTEuMTM1LTEuODAyem0tNi44NiAxOS44MThMMTQuNDMyIDE2bDkuNTczLTcuMjY2eiIvPjwvc3ZnPg==" alt="VS Code">
+                        </div>
+                        <div class="ide-info">
+                            <div class="ide-name">{% trans "VS Code" %}</div>
+                            <div class="ide-description">{% trans "One-click install for Visual Studio Code" %}</div>
+                        </div>
+                        <i class="fas fa-arrow-right ide-arrow"></i>
+                    </a>
+                    
+                    <a :href="cursorInstallUrl" class="ide-option ide-option-cursor">
+                        <div class="ide-icon">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMyAzdjE4aDE4Ii8+PHBhdGggZD0iTTkgMTVsNi02Ii8+PHBhdGggZD0iTTE1IDlsLTYgNiIvPjxwYXRoIGQ9Ik05IDlsNiA2Ii8+PC9zdmc+" alt="Cursor">
+                        </div>
+                        <div class="ide-info">
+                            <div class="ide-name">{% trans "Cursor" %}</div>
+                            <div class="ide-description">{% trans "One-click install for Cursor IDE" %}</div>
+                        </div>
+                        <i class="fas fa-arrow-right ide-arrow"></i>
+                    </a>
+                    
+                    <div class="ide-option ide-option-claude" @click="copyClaudeCommand">
+                        <div class="ide-icon">
+                            <img src="data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4.233 4.233'%3E%3Cpath fill='%23ffffff' d='m1 2.73l.726-.408l.012-.036l-.012-.02h-.035l-.122-.007l-.415-.011l-.36-.015l-.35-.019l-.087-.018l-.082-.109l.008-.054l.074-.05l.106.01l.233.016l.351.024l.255.015l.376.04h.06l.009-.025l-.02-.015l-.017-.015l-.363-.246l-.392-.26l-.206-.15l-.111-.075L.58 1.23l-.024-.155l.101-.111l.136.01l.034.009l.138.105l.293.228l.384.282l.056.047l.022-.016l.003-.011l-.025-.042l-.209-.377l-.222-.384l-.1-.159l-.025-.095a.5.5 0 0 1-.016-.112l.115-.157l.063-.02l.154.02l.064.057l.096.217l.154.344l.24.466l.07.139l.037.128l.014.04h.024V1.66l.02-.263l.036-.323L2.25.66l.012-.117l.058-.14l.115-.076l.09.043l.074.106l-.01.068l-.045.285l-.086.447l-.056.3h.033l.037-.038l.152-.2l.254-.319l.113-.126l.13-.14l.085-.066h.159l.117.174l-.053.18l-.164.207l-.135.176l-.195.262l-.121.21l.011.016l.029-.002l.44-.094l.237-.043l.283-.049l.129.06l.014.061l-.05.124l-.304.075l-.355.071l-.53.126l-.006.004l.007.01l.239.022l.102.006h.25l.464.034l.122.08l.073.099l-.012.075l-.187.095l-.253-.06l-.59-.14l-.201-.05h-.028v.016l.168.165l.309.279l.386.359l.02.089l-.05.07l-.052-.008l-.34-.255l-.13-.115l-.297-.25h-.02v.026l.068.1l.361.543l.02.166l-.027.055l-.094.032l-.102-.018l-.212-.297l-.218-.334l-.175-.299l-.022.012l-.104 1.118l-.048.057l-.113.043l-.093-.071l-.05-.115l.05-.228l.06-.296l.048-.236l.044-.292l.026-.098l-.001-.006l-.022.003l-.22.303l-.336.453l-.266.284l-.064.026l-.11-.057l.01-.102l.062-.091l.368-.468l.221-.29l.143-.167v-.024h-.009l-.976.634l-.174.022l-.075-.07l.01-.115l.035-.037z'/%3E%3C/svg%3E" alt="Claude Code">
+                        </div>
+                        <div class="ide-info">
+                            <div class="ide-name">{% trans "Claude Code" %}</div>
+                            <div class="ide-description">[[ claudeCommandCopied ? 'Command copied! Run in terminal' : 'Click to copy terminal command' ]]</div>
+                        </div>
+                        <i :class="['fas', claudeCommandCopied ? 'fa-check' : 'fa-copy', 'ide-arrow']"></i>
+                    </div>
+                </div>
+                
+                <!-- Manual Config Toggle -->
+                <div class="manual-config-toggle">
+                    <button class="manual-config-btn" @click="showManualConfig = !showManualConfig">
+                        <i :class="['fas', showManualConfig ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
+                        {% trans "Manual Configuration" %}
+                    </button>
+                </div>
+                
+                <!-- Manual Config Section (Hidden by default) -->
+                <div v-if="showManualConfig" class="manual-config-section">
+                    <div class="config-tabs">
+                        <button :class="['config-tab', configTab === 'vscode' ? 'active' : '']" 
+                                @click="configTab = 'vscode'">
+                            <i class="fas fa-code"></i> VS Code
+                        </button>
+                        <button :class="['config-tab', configTab === 'claude' ? 'active' : '']" 
+                                @click="configTab = 'claude'">
+                            <i class="fas fa-terminal"></i> Claude Desktop
+                        </button>
+                    </div>
+                    
+                    <div class="config-display-wrapper">
+                        <button class="copy-config-btn" @click="copyConfig">
+                            <i class="fas fa-copy"></i> {% trans "Copy" %}
+                        </button>
+                        <div class="config-display">[[ configTab === 'vscode' ? mcpConfig.vscode : mcpConfig.claude ]]</div>
+                    </div>
+                    
+                    <div class="setup-instructions">
+                        <h5><i class="fas fa-info-circle"></i> {% trans "Setup Instructions" %}</h5>
+                        <div v-if="configTab === 'vscode'">
+                            <ol>
+                                <li>{% trans "Open VS Code and go to Settings (Cmd/Ctrl + ,)" %}</li>
+                                <li>{% trans "Search for 'MCP' in settings" %}</li>
+                                <li>{% trans "Edit your .vscode/mcp.json file" %}</li>
+                                <li>{% trans "Add the configuration above" %}</li>
+                                <li>{% trans "Restart VS Code to apply changes" %}</li>
+                            </ol>
+                        </div>
+                        <div v-if="configTab === 'claude'">
+                            <ol>
+                                <li>{% trans "Open Claude Desktop configuration file:" %}</li>
+                                <li style="font-family: monospace; font-size: 0.85em;">~/Library/Application Support/Claude/claude_desktop_config.json</li>
+                                <li>{% trans "Add the mcpServers configuration above" %}</li>
+                                <li>{% trans "Save and restart Claude Desktop" %}</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block footer_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+<script>
+    const serverHost = '{{ serverHost }}';
+    
+    new Vue({
+        delimiters: ['[[', ']]'],
+        el: '#apiKeysApp',
+        data: {
+            keys: [],
+            newKeyName: '',
+            newlyCreatedKey: null,
+            loading: false,
+            showConfigModal: false,
+            showManualConfig: false,
+            showUpdateInstructions: false,
+            configTab: 'vscode',
+            selectedKey: null,
+            claudeCommandCopied: false,
+            mcpConfig: {
+                vscode: '',
+                claude: ''
+            },
+            vscodeInstallUrl: '',
+            cursorInstallUrl: '',
+            claudeCommand: '',
+            // Update checker
+            currentVersion: '{{ plugin_version }}',
+            latestVersion: null,
+            updateAvailable: false,
+            checkingUpdate: false,
+            releaseNotes: null,
+            releaseUrl: null,
+            githubRepo: 'elwizard33/cyberpanel-mcp'
+        },
+        mounted() {
+            this.fetchKeys();
+        },
+        methods: {
+            async fetchKeys() {
+                this.loading = true;
+                try {
+                    const response = await fetch('/apiKeys/api/keys/');
+                    const data = await response.json();
+                    if (data.status === 1) {
+                        this.keys = data.keys;
+                    }
+                } catch (error) {
+                    console.error('Error fetching keys:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async createKey() {
+                if (!this.newKeyName.trim()) return;
+                
+                this.loading = true;
+                try {
+                    const response = await fetch('/apiKeys/api/keys/create/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        },
+                        body: JSON.stringify({ name: this.newKeyName })
+                    });
+                    const data = await response.json();
+                    if (data.status === 1) {
+                        this.newlyCreatedKey = data.key;
+                        this.newKeyName = '';
+                        this.fetchKeys();
+                    } else {
+                        alert(data.error_message || 'Failed to create key');
+                    }
+                } catch (error) {
+                    console.error('Error creating key:', error);
+                    alert('Failed to create key');
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async revokeKey(key) {
+                const action = key.is_active ? 'revoke' : 'activate';
+                if (!confirm(`Are you sure you want to ${action} this key?`)) return;
+                
+                try {
+                    const response = await fetch(`/apiKeys/api/keys/${key.id}/toggle/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.status === 1) {
+                        this.fetchKeys();
+                    } else {
+                        alert(data.error_message || 'Operation failed');
+                    }
+                } catch (error) {
+                    console.error('Error toggling key:', error);
+                }
+            },
+            
+            async deleteKey(key) {
+                if (!confirm('Are you sure you want to permanently delete this key?')) return;
+                
+                try {
+                    const response = await fetch(`/apiKeys/api/keys/${key.id}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': this.getCsrfToken()
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.status === 1) {
+                        this.fetchKeys();
+                    } else {
+                        alert(data.error_message || 'Failed to delete key');
+                    }
+                } catch (error) {
+                    console.error('Error deleting key:', error);
+                }
+            },
+            
+            showMCPConfig(key) {
+                this.selectedKey = key;
+                this.showManualConfig = false;
+                this.claudeCommandCopied = false;
+                
+                // Generate VS Code one-click install URL
+                // Ensure host has proper https:// prefix
+                const hostUrl = serverHost.startsWith('http') ? serverHost : 'https://' + serverHost;
+                
+                // VS Code MCP install format: vscode:mcp/install?{encoded-json}
+                // The JSON config must include: type, name, and server-specific fields
+                const vscodeConfig = {
+                    "type": "stdio",
+                    "name": "cyberpanel",
+                    "command": "npx",
+                    "args": ["-y", "cyberpanel-mcp"],
+                    "env": {
+                        "CYBERPANEL_HOST": hostUrl,
+                        "CYBERPANEL_API_KEY": "PASTE_YOUR_FULL_API_KEY_HERE"
+                    }
+                };
+                this.vscodeInstallUrl = 'vscode:mcp/install?' + encodeURIComponent(JSON.stringify(vscodeConfig));
+                
+                // Generate Cursor one-click install URL
+                // Cursor format: cursor://anysphere.cursor-deeplink/mcp/install?name={name}&config={base64}
+                const cursorConfig = {
+                    "command": "npx",
+                    "args": ["-y", "cyberpanel-mcp"],
+                    "env": {
+                        "CYBERPANEL_HOST": hostUrl,
+                        "CYBERPANEL_API_KEY": "PASTE_YOUR_FULL_API_KEY_HERE"
+                    }
+                };
+                const cursorConfigBase64 = btoa(JSON.stringify(cursorConfig));
+                this.cursorInstallUrl = 'cursor://anysphere.cursor-deeplink/mcp/install?name=cyberpanel&config=' + cursorConfigBase64;
+                
+                // Generate Claude Code CLI command
+                this.claudeCommand = `claude mcp add cyberpanel -e CYBERPANEL_HOST=${hostUrl} -e CYBERPANEL_API_KEY=PASTE_YOUR_API_KEY -- npx -y cyberpanel-mcp`;
+                
+                // Manual config JSON (for those who prefer it)
+                this.mcpConfig.vscode = JSON.stringify({
+                    "servers": {
+                        "cyberpanel": {
+                            "type": "stdio",
+                            "command": "npx",
+                            "args": ["-y", "cyberpanel-mcp"],
+                            "env": {
+                                "CYBERPANEL_HOST": hostUrl,
+                                "CYBERPANEL_API_KEY": key.key_preview + "..."
+                            }
+                        }
+                    }
+                }, null, 2);
+                
+                this.mcpConfig.claude = JSON.stringify({
+                    "mcpServers": {
+                        "cyberpanel": {
+                            "command": "npx",
+                            "args": ["-y", "cyberpanel-mcp"],
+                            "env": {
+                                "CYBERPANEL_HOST": hostUrl,
+                                "CYBERPANEL_API_KEY": key.key_preview + "..."
+                            }
+                        }
+                    }
+                }, null, 2);
+                
+                this.showConfigModal = true;
+            },
+            
+            copyClaudeCommand() {
+                this.copyToClipboard(this.claudeCommand);
+                this.claudeCommandCopied = true;
+                setTimeout(() => {
+                    this.claudeCommandCopied = false;
+                }, 3000);
+            },
+            
+            copyConfig() {
+                const config = this.configTab === 'vscode' ? this.mcpConfig.vscode : this.mcpConfig.claude;
+                this.copyToClipboard(config);
+            },
+            
+            copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Show brief success feedback
+                    const btn = event.target.closest('button');
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    // Fallback
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                });
+            },
+            
+            copyUpdateCommands() {
+                const commands = `cd ~/cyberpanel-mcp\ngit pull\nsudo bash update-plugin.sh`;
+                this.copyToClipboard(commands);
+            },
+            
+            async checkForUpdates() {
+                this.checkingUpdate = true;
+                this.releaseNotes = null;
+                this.releaseUrl = null;
+                
+                try {
+                    // Fetch latest release from GitHub API
+                    const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/releases/latest`);
+                    
+                    if (response.status === 404) {
+                        // No releases yet, check tags instead
+                        const tagsResponse = await fetch(`https://api.github.com/repos/${this.githubRepo}/tags`);
+                        const tags = await tagsResponse.json();
+                        
+                        if (tags.length > 0) {
+                            this.latestVersion = tags[0].name.replace(/^v/, '');
+                        } else {
+                            // No tags, assume current is latest
+                            this.latestVersion = this.currentVersion;
+                        }
+                    } else if (response.ok) {
+                        const release = await response.json();
+                        this.latestVersion = release.tag_name.replace(/^v/, '');
+                        this.releaseNotes = release.body ? release.body.substring(0, 200) + (release.body.length > 200 ? '...' : '') : null;
+                        this.releaseUrl = release.html_url;
+                    }
+                    
+                    // Compare versions
+                    this.updateAvailable = this.compareVersions(this.latestVersion, this.currentVersion) > 0;
+                    
+                } catch (error) {
+                    console.error('Error checking for updates:', error);
+                    alert('Failed to check for updates. Please check your internet connection.');
+                } finally {
+                    this.checkingUpdate = false;
+                }
+            },
+            
+            compareVersions(v1, v2) {
+                // Compare semantic versions: returns 1 if v1 > v2, -1 if v1 < v2, 0 if equal
+                const parts1 = v1.split('.').map(Number);
+                const parts2 = v2.split('.').map(Number);
+                
+                for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+                    const p1 = parts1[i] || 0;
+                    const p2 = parts2[i] || 0;
+                    if (p1 > p2) return 1;
+                    if (p1 < p2) return -1;
+                }
+                return 0;
+            },
+            
+            formatDate(dateString) {
+                if (!dateString) return 'N/A';
+                const date = new Date(dateString);
+                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            },
+            
+            getCsrfToken() {
+                const name = 'csrftoken';
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        }
+    });
+</script>
+{% endblock %}

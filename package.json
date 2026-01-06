@@ -1,0 +1,58 @@
+{
+  "name": "cyberpanel-mcp",
+  "version": "1.0.5",
+  "description": "MCP Server for CyberPanel - Control your CyberPanel server through Model Context Protocol with 200+ tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "cyberpanel-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
+    "test": "vitest"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "cyberpanel",
+    "model-context-protocol",
+    "server-management",
+    "web-hosting",
+    "ai",
+    "claude",
+    "vscode",
+    "litespeed",
+    "openlitespeed"
+  ],
+  "author": "elwizard33",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elwizard33/cyberpanel-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elwizard33/cyberpanel-mcp/issues"
+  },
+  "homepage": "https://github.com/elwizard33/cyberpanel-mcp#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

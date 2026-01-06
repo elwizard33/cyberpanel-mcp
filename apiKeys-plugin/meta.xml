@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cyberpanelPluginConfig>
+    <name>apiKeys</name>
+    <type>plugin</type>
+    <description>API Key Management for MCP Server Integration</description>
+    <version>1.0.0</version>
+</cyberpanelPluginConfig>
