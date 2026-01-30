@@ -7,9 +7,9 @@
 # and restarts the necessary services.
 #
 # Usage:
-#   curl -sL https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh | bash
+#   curl -sL https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh | bash
 #   OR
-#   wget -qO- https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh | bash
+#   wget -qO- https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh | bash
 #   OR
 #   ./install-plugin.sh (if running locally)
 #
@@ -106,20 +106,14 @@ install_plugin_files() {
         log_info "Downloading plugin from GitHub..."
         cd /tmp
         rm -rf cyberpanel-mcp-temp
-        git clone --depth 1 --filter=blob:none --sparse https://github.com/usmannasir/cyberpanel.git cyberpanel-mcp-temp
+        git clone --depth 1 https://github.com/elwizard33/cyberpanel-mcp.git cyberpanel-mcp-temp
         cd cyberpanel-mcp-temp
-        git sparse-checkout set cyberpanel-mcp
         
-        if [[ -d "cyberpanel-mcp/$PLUGIN_SOURCE_DIR" ]]; then
-            cp -r "cyberpanel-mcp/$PLUGIN_SOURCE_DIR" "$CYBERPANEL_ROOT/$PLUGIN_NAME"
+        if [[ -d "$PLUGIN_SOURCE_DIR" ]]; then
+            cp -r "$PLUGIN_SOURCE_DIR" "$CYBERPANEL_ROOT/$PLUGIN_NAME"
         else
             log_error "Plugin source not found in repository"
             exit 1
-        fi
-        
-        # Also get patches
-        if [[ -d "cyberpanel-mcp/patches" ]]; then
-            cp -r "cyberpanel-mcp/patches" /tmp/apikeys-patches
         fi
         
         cd /tmp
@@ -710,7 +704,7 @@ if [[ -f "$CLOUDAPI_FILE" ]] && ! grep -q "HTTP_X_API_KEY" "$CLOUDAPI_FILE"; the
     cd apikeys-recovery-install
     
     # Try to download install script from GitHub
-    if curl -sL --connect-timeout 30 -o install-plugin.sh "https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh" 2>/dev/null; then
+    if curl -sL --connect-timeout 30 -o install-plugin.sh "https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh" 2>/dev/null; then
         chmod +x install-plugin.sh
         log "Running reinstallation..."
         if bash install-plugin.sh --auto-recovery >> "$LOG_FILE" 2>&1; then
@@ -738,7 +732,7 @@ RECOVERY_SCRIPT
     cat > "$SYSTEMD_SERVICE" << 'SYSTEMD_SERVICE'
 [Unit]
 Description=CyberPanel API Keys Plugin Auto-Recovery
-Documentation=https://github.com/usmannasir/cyberpanel/tree/stable/cyberpanel-mcp
+Documentation=https://github.com/elwizard33/cyberpanel-mcp
 After=lscpd.service
 BindsTo=lscpd.service
 

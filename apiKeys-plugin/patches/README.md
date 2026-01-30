@@ -28,7 +28,7 @@ chmod +x install-plugin.sh
 Or install directly from GitHub:
 
 ```bash
-curl -sL https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh | bash
+curl -sL https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh | bash
 ```
 
 ## Manual Installation
