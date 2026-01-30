@@ -423,13 +423,13 @@ The API Keys plugin for CyberPanel provides:
 **Basic Installation:**
 ```bash
 # Download and run the install script
-curl -sL https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh | sudo bash
+curl -sL https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh | sudo bash
 ```
 
 **With Auto-Recovery (recommended):**
 ```bash
 # Automatically reinstalls after CyberPanel upgrades
-curl -sL https://raw.githubusercontent.com/usmannasir/cyberpanel/stable/cyberpanel-mcp/install-plugin.sh | sudo bash -s -- --auto-recovery
+curl -sL https://raw.githubusercontent.com/elwizard33/cyberpanel-mcp/main/install-plugin.sh | sudo bash -s -- --auto-recovery
 ```
 
 ### ⚠️ CyberPanel Upgrade Behavior
